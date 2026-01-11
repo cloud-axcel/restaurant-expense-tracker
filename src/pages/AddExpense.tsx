@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useExpenses } from '@/contexts/ExpenseContext';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,10 +10,12 @@ import { PlusCircle, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import VendorCombobox from '@/components/VendorCombobox';
 import ProductCombobox from '@/components/ProductCombobox';
+import { supabase } from '@/App';
+import { getUserId } from '@/lib/utils';
+import { table_name } from '@/constants/constants';
 
 const AddExpense = () => {
   const navigate = useNavigate();
-  const { addExpense } = useExpenses();
 
   const getDefaultDate = () => format(new Date(), 'yyyy-MM-dd');
 
@@ -34,7 +35,7 @@ const AddExpense = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.vendor.trim() || !formData.product.trim()) {
@@ -55,14 +56,17 @@ const AddExpense = () => {
       return;
     }
 
-    addExpense({
-      date: formData.date,
-      vendor: formData.vendor.trim(),
-      product: formData.product.trim(),
-      unit: formData.unit.trim(),
-      rate,
-      quantity,
-    });
+    await supabase
+      .from(table_name.expenses)
+      .insert({
+        date: formData.date,
+        vendor: formData.vendor.trim(),
+        product: formData.product.trim(),
+        unit: formData.unit.trim(),
+        rate,
+        quantity,
+        user_id: getUserId()
+      })
 
     toast.success('Expense added successfully!');
 
@@ -88,11 +92,7 @@ const AddExpense = () => {
     });
   };
 
-  const handleAddAnother = (e: React.FormEvent) => {
-    handleSubmit(e);
-  };
-
-  const handleAddAndView = (e: React.FormEvent) => {
+  const handleAddAndView = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.vendor.trim() || !formData.product.trim()) {
@@ -108,14 +108,17 @@ const AddExpense = () => {
       return;
     }
 
-    addExpense({
-      date: formData.date,
-      vendor: formData.vendor.trim(),
-      product: formData.product.trim(),
-      unit: formData.unit.trim(),
-      rate,
-      quantity,
-    });
+    await supabase
+      .from(table_name.expenses)
+      .insert({
+        date: formData.date,
+        vendor: formData.vendor.trim(),
+        product: formData.product.trim(),
+        unit: formData.unit.trim(),
+        rate,
+        quantity,
+        user_id: getUserId()
+      })
 
     toast.success('Expense added successfully!');
     navigate('/expenses');

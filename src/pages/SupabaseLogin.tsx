@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { UtensilsCrossed, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/App';
+import { USERID_STORAGE_KEY } from '@/constants/constants';
 
 const SupabaseLogin = () => {
   const [email, setEmail] = useState('lokesh.bajracharya5@gmail.com');
@@ -22,7 +23,11 @@ const SupabaseLogin = () => {
     await supabase.auth.signInWithPassword({
       email,
       password,
-    }).then(() => {
+    }).then((res) => {
+      const userId = res?.data?.user?.id;
+
+      localStorage.setItem(USERID_STORAGE_KEY, userId);
+      res?.data?.user
       toast.success('Login Successful')
       navigate('/dashboard')
     })
